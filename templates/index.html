@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sentiment Analyzer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Sentiment Analyzer</h1>
+
+        <div class="mb-3">
+            <textarea id="inputText" class="form-control" rows="5" placeholder="Enter your text here..."></textarea>
+        </div>
+
+        <div class="text-center mb-3">
+            <button class="btn btn-primary" onclick="analyzeText()">Analyze</button>
+        </div>
+
+        {% if not models %}
+        <div class="text-center mb-3">
+            <button class="btn btn-warning" onclick="retrainModel()">Train New Model</button>
+        </div>
+        {% endif %}
+
+        <!-- <div class="mb-3">
+            <label for="csvFile" class="form-label">Upload CSV for Training</label>
+            <input class="form-control" type="file" id="csvFile">
+            <button class="btn btn-success mt-2" onclick="uploadDataset()">Upload & Train</button>
+        </div> -->
+
+        <div class="mb-3">
+            <label for="modelSelect" class="form-label">Select Model</label>
+            <select class="form-select" id="modelSelect" onchange="switchModel()">
+                {% for model_id, model_info in models.items() %}
+                <option value="{{ model_id }}" {% if model_id==current_model_id %}selected{% endif %}>
+                    {{ model_info['name'] }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="loading" class="text-center mb-3" style="display:none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Processing...</span>
+            </div>
+            <p>Processing...</p>
+        </div>
+
+        <div class="mt-4" id="resultCard" style="display:none;">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Analysis Result</h5>
+                    <p id="result"></p>
+                    <p id="entities"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function analyzeText() {
+            const text = document.getElementById("inputText").value;
+            const resultCard = document.getElementById("resultCard");
+            const loading = document.getElementById("loading");
+
+            resultCard.style.display = 'none';
+            loading.style.display = 'block';
+
+            const response = await fetch("/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text })
+            });
+
+            const data = await response.json();
+            loading.style.display = 'none';
+            resultCard.style.display = 'block';
+
+            if (data.error) {
+                document.getElementById("result").innerText = data.error;
+                document.getElementById("entities").innerText = '';
+            } else {
+                const resultEl = document.getElementById("result");
+                resultEl.classList.remove("positive", "negative", "neutral");
+
+                let sentimentClass = "neutral";
+                if (data.sentiment.toLowerCase() === "positive") sentimentClass = "positive";
+                else if (data.sentiment.toLowerCase() === "negative") sentimentClass = "negative";
+
+                resultEl.classList.add(sentimentClass);
+                resultEl.innerText = `Sentiment: ${data.sentiment.toUpperCase()} | Confidence: ${(data.confidence * 100).toFixed(2)}%`;
+
+                if (data.entities.length > 0) {
+                    document.getElementById("entities").innerText =
+                        "Named Entities: " + data.entities.map(e => `${e[0]} (${e[1]})`).join(", ");
+                } else {
+                    document.getElementById("entities").innerText = "No named entities found.";
+                }
+            }
+        }
+
+        async function retrainModel() {
+            const loading = document.getElementById("loading");
+            const resultCard = document.getElementById("resultCard");
+
+            resultCard.style.display = 'none';
+            loading.style.display = 'block';
+
+            const response = await fetch("/retrain", { method: "POST" });
+            const data = await response.json();
+
+            loading.style.display = 'none';
+
+            if (data.refresh) {
+                location.reload();
+            } else {
+                alert(data.status);
+            }
+        }
+
+        async function uploadDataset() {
+            const loading = document.getElementById("loading");
+            const resultCard = document.getElementById("resultCard");
+
+            resultCard.style.display = 'none';
+            loading.style.display = 'block';
+
+            const fileInput = document.getElementById("csvFile");
+            if (!fileInput.files.length) {
+                alert("Please select a CSV file");
+                loading.style.display = 'none';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const response = await fetch("/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+            loading.style.display = 'none';
+
+            if (data.refresh) {
+                location.reload();
+            } else if (data.error) {
+                alert("Error: " + data.error);
+            } else {
+                alert(data.status);
+            }
+        }
+
+        async function switchModel() {
+            const select = document.getElementById("modelSelect");
+            const model_id = select.value;
+
+            const response = await fetch("/switch_model", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ model_id })
+            });
+
+            const data = await response.json();
+            alert(data.status || data.error);
+        }
+    </script>
+
+</body>
+</html>

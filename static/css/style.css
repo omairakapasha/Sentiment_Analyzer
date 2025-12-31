@@ -1,0 +1,127 @@
+/* General body styling */
+body {
+    background: linear-gradient(to right, #f8f9fa, #e9ecef);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+}
+
+/* Container */
+.container {
+    max-width: 800px;
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+h1 {
+    font-weight: 700;
+    color: #343a40;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Textarea */
+#inputText {
+    border-radius: 10px;
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+    padding: 15px;
+    resize: vertical;
+    transition: box-shadow 0.3s ease;
+}
+
+#inputText:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    border-color: #80bdff;
+}
+
+/* Buttons */
+button.btn {
+    min-width: 150px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Upload input */
+input[type="file"] {
+    border-radius: 8px;
+}
+
+/* Result card */
+#resultCard {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+#resultCard .card {
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Analysis result text */
+#result {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #495057;
+}
+
+#entities {
+    font-size: 0.95rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* Loading spinner */
+#loading p {
+    font-size: 1rem;
+    color: #495057;
+    margin-top: 10px;
+}
+
+/* Fade-in animation for result card */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .container {
+        padding: 20px 20px;
+    }
+
+    button.btn {
+        min-width: 120px;
+        font-size: 0.9rem;
+    }
+
+    #inputText {
+        font-size: 0.95rem;
+    }
+}
+
+
+/* Result text colors */
+#result.positive {
+    color: #28a745; /* green */
+    font-weight: 700;
+}
+
+#result.negative {
+    color: #dc3545; /* red */
+    font-weight: 700;
+}
+
+#result.neutral {
+    color: #6c757d; /* gray */
+    font-weight: 700;
+}
