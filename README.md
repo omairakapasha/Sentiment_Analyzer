@@ -142,7 +142,3 @@ analyzer.train(texts, labels, preprocess_method='spacy')
 # Using NLTK
 analyzer.train(texts, labels, preprocess_method='nltk')
 ```
-
-## License
-
-Free to use and modify for your projects.
